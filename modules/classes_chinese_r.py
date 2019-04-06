@@ -20,7 +20,7 @@ primes = (97, 101, 103, 107, 109, 113, 127, 131)
 m = 1
 for i in range(len(primes)):
     m *= primes[i]
-mi = tuple([int(m/primes[i]) for i in range(len(primes))])
+mi = tuple([m // primes[i] for i in range(len(primes))])
 miopp = tuple([inverse_el(mi[i], primes[i]) for i in range(len(primes))])
 
 
@@ -30,19 +30,27 @@ class ChineseRT_Natural:
         self.m = m
         self.mi = mi
         self.miopp = miopp
+        self.x = -1
         
-        if type(arg) == type(list()):
+        if type(arg) == type(list()) and len(arg) == len(self.primes):
             self.r = arg.copy()
+        elif type(arg) == type(tuple()) and len(arg) == len(self.primes):
+            self.r = arg
         elif type(arg) == type(int()):
             self.r = [0 for i in range(len(self.primes))]
             for i in range(len(self.primes)):
                 self.r[i] = arg % self.primes[i]
-        self.r = tuple(self.r)
+            self.x = arg
+        else:
+            raise TypeError
         
-        self.x = -1
+        self.r = tuple(self.r)
     
     
     def value(self):
+        # TODO 
+        # необходимо переделать вычисления здесь
+        # c использованием своих алгоритмов
         if self.x != -1:
             return self.x
         else:
@@ -51,6 +59,16 @@ class ChineseRT_Natural:
                 self.x += self.r[i]*self.mi[i]*self.miopp[i]
             self.x %= self.m
             return self.x
+        
+        
+    def __eq__(self, other):
+        assert type(self) == type(other)
+        res = True
+        i = 0
+        while res and i < len(self.primes):
+            res = res and self.r[i] == other.r[i]
+            i += 1
+        return res
     
     
     def __add__(self, other):
@@ -77,28 +95,37 @@ class ChineseRT_Natural:
         return ChineseRT_Natural(res)
     
     
+    # 1 / self
     def inverse(self):
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = inverse_el(self.r[i], self.primes[i])
-        return ChineseRT_Natural(res) 
+        return ChineseRT_Natural(res)
         
-    
+        
     """
-    def __div__(self, other):
+    def __floordiv__(self, other):
         assert type(self) == type(other)
-        res = ChineseRT_Natural(0)
+        res = [0 for i in range(len(self.primes))]
+        zero = ChineseRT_Natural(0)
         for i in range(len(self.primes)):
-            res.r[i] = (self.r[i] * other.r[i]) % self.primes[i]
-        return res
+            res[i] = (self.r[i] - other.r[i]) % self.primes[i]
+        return ChineseRT_Natural(res)
     """
+    
+    
+    def __truediv__(self, other):
+        assert type(self) == type(other)
+        res = [0 for i in range(len(self.primes))]
+        inv = other.inverse()
+        for i in range(len(self.primes)):
+            res[i] = (self.r[i] * inv.r[i]) % self.primes[i]
+        return ChineseRT_Natural(res)
+        
     
     """
     def __mod__(self, other):
         assert type(self) == type(other)
-        res = ChineseRT_Natural(0)
-        for i in range(len(self.primes)):
-            res.r[i] = (self.r[i] * other.r[i]) % self.primes[i]
-        return res
-    """    
+        return self - other*(self // other)
+    """
     
