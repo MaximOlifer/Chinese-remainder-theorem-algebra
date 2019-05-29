@@ -1,4 +1,4 @@
-import console.N, console.Z, console.Q, console.P
+import console.N_RNS, console.Z, console.Q, console.P
 
 
 def main():
@@ -15,7 +15,7 @@ def main():
         menu = int(input())
         
         if menu == 1:
-            console.N.main()
+            console.N_RNS.main()
         elif menu == 2:
             console.Z.main()
         elif menu == 3:

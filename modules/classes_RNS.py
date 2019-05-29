@@ -29,7 +29,7 @@ Sq = sum(mi)
 si = [( -inverse_el(primes[i], Sq)) % Sq  for i in range(len(primes))]
 
 
-class ChineseRT_Natural:
+class RNS_Natural:
     def __init__(self, arg):
         self.primes = primes
         self.m = m
@@ -43,11 +43,18 @@ class ChineseRT_Natural:
             self.r = tuple([arg[i] for i in range(len(primes))].copy())
         elif type(arg) == type(tuple()) and len(arg) == len(self.primes):
             self.r = tuple([arg[i] for i in range(len(primes))].copy())
-        elif type(arg) == type(int()):
+        elif type(arg) == type(int()) or type(arg) == type(str()):
+            arg = int(arg)
+            assert arg >= 0
             self.r = [0 for i in range(len(self.primes))]
             for i in range(len(self.primes)):
                 self.r[i] = arg % self.primes[i]
             self.x = arg
+        elif type(arg) == type(RNS_Integer(1)):
+            assert arg.b == 0
+            self.r = arg.r
+        elif type(arg) == type(RNS_Natural(1)):
+            pass
         else:
             raise TypeError
         
@@ -69,7 +76,7 @@ class ChineseRT_Natural:
         
     
     def __str__(self):
-        return ("ChineseRT_Natural(" + str(self.value()) + ")")    
+        return ("RNS_Natural(" + str(self.value()) + ")")    
         
         
     def __eq__(self, other):
@@ -92,7 +99,7 @@ class ChineseRT_Natural:
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = (self.r[i] + other.r[i]) % self.primes[i]
-        z = ChineseRT_Natural(res)
+        z = RNS_Natural(res)
         return z
     
     
@@ -101,7 +108,7 @@ class ChineseRT_Natural:
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = (self.r[i] - other.r[i]) % self.primes[i]
-        return ChineseRT_Natural(res)
+        return RNS_Natural(res)
     
     
     def __mul__(self, other):
@@ -109,7 +116,7 @@ class ChineseRT_Natural:
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = (self.r[i] * other.r[i]) % self.primes[i]
-        return ChineseRT_Natural(res)
+        return RNS_Natural(res)
     
     
     # 1 / self
@@ -117,7 +124,7 @@ class ChineseRT_Natural:
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = inverse_el(self.r[i], self.primes[i])
-        return ChineseRT_Natural(res)
+        return RNS_Natural(res)
     
     
     def __truediv__(self, other):
@@ -126,7 +133,7 @@ class ChineseRT_Natural:
         inv = other.inverse()
         for i in range(len(self.primes)):
             res[i] = (self.r[i] * inv.r[i]) % self.primes[i]
-        return ChineseRT_Natural(res)
+        return RNS_Natural(res)
         
     
     # For comparsion #TODO
@@ -179,11 +186,11 @@ class ChineseRT_Natural:
             
     
     def _divide(self, other):
-        assert type(self) == type(other) and other != ChineseRT_Natural(0)
+        assert type(self) == type(other) and other != RNS_Natural(0)
         x, y = self, other
         
-        q = ChineseRT_Natural(0)
-        e = ChineseRT_Natural(1)
+        q = RNS_Natural(0)
+        e = RNS_Natural(1)
         r = x
         while r >= y:
             q += e
@@ -192,26 +199,101 @@ class ChineseRT_Natural:
     
     
     def __floordiv__(self, other):
-        assert type(self) == type(other)
+        assert type(self) == type(other) and other != RNS_Natural(0)
         return self._divide(other)[0]
         
         
     def __mod__(self, other):
-        assert type(self) == type(other)
+        assert type(self) == type(other) and other != RNS_Natural(0)
         return self._divide(other)[1]
     
 
-class ChineseRT_Integer(ChineseRT_Natural):
+class RNS_Integer(RNS_Natural):
     def __init__(self, arg):
         if type(arg) == type(list()) and len(arg) == len(self.primes):
             self.b = 0
         elif type(arg) == type(tuple()) and len(arg) == len(self.primes):
             self.b = 0
-        elif type(arg) == type(int()):
+        elif type(arg) == type(int()) or type(arg) == type(str()):
+            arg = int(arg)
             self.b = int(arg < 0)
             arg = abs(arg)
+        elif type(arg) == type(RNS_Natural()) or type(arg) == type(RNS_Integer):
+            pass
         else:
             raise TypeError
         
-        super.__init__(arg)
-        
+        super().__init__(arg)
+    
+    
+    def __neg__(self):
+        res = RNS_Integer()
+        res.b = int(not(bool(self.b)))
+        return res
+    
+    
+    def __str__(self):
+        b = ""
+        if self.b:
+            b = "-"
+        return ("RNS_Integer(" + b + str(self.value()) + ")")  
+    
+    
+    def __eq__(self, other):
+        if self.b == other.b:
+            return super().__eq__(self, other)
+        else:
+            return False
+    
+    def __abs__(self):
+        return RNS_Integer(self.r)
+    
+    
+    def __add__(self, other):
+        assert type(self) == type(other)
+        if self.b == other.b:
+            res = RNS_Integer(super().__add__(self, other))
+            res.b = other.b
+        else:
+            if abs(self) == abs(other):
+                res = RNS_Integer(0)
+            elif abs(self) > abs(other):
+                res = self - other
+                res.b = self.b
+            else:
+                res = other - self
+                res.b = other.b
+        return res
+    
+    
+    def __sub__(self, other):
+        assert type(self) == type(other)
+        return self + (-other)
+    
+    
+    def __mul__(self, other):
+        assert type(self) == type(other)
+        res = RNS_Integer(super().__mul__(self, other))
+        if self.b == other.b:
+            res.b = 0
+        else:
+            res.b = 1
+        return res
+    
+    def __floordiv__(self, other):
+        assert type(self) == type(other) and other != RNS_Integer(0)
+        res = RNS_Integer(super().__floordiv__(self, other))      
+        if self.b == other.b:
+            res.b = 0
+        else:
+            res.b = 1      
+        return res
+    
+    def __mod__(self, other):
+        assert type(self) == type(other) and other != RNS_Integer(0)
+        res = RNS_Integer(super().__mod__(self, other))      
+        if self.b == other.b:
+            res.b = 0
+        else:
+            res.b = 1      
+        return res

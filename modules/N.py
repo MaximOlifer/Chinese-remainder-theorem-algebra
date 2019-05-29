@@ -45,7 +45,7 @@ def ADD_1N_N (n1):
 
 
 # N-4
-def ADD_NN_N (A, B):
+def ADD_NN_N(A, B):
     # Если количество разрядов второго числа больше первого 
     if A.n < B.n:
         A, B = B, A

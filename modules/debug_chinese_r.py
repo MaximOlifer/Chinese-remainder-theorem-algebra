@@ -17,9 +17,17 @@ def gcd_rns(x, y):
     return x + y
 
 
-x = ChineseRT_Natural(5)
+def lcm_rns(x, y):
+    return x*y//gcd_rns(x, y)
+
+x = ChineseRT_Natural(6)
 y = ChineseRT_Natural(2)
-print(x//y)
+print(x.r)
+print(y.r)
+print(y.inverse().r)
+z = x / y
+print(z.r)
+print(z.value())
 
 
 
