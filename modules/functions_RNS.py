@@ -1,5 +1,8 @@
+from modules.classes_RNS import *
+
+
 def gcd_rns(x, y):
-    z = ChineseRT_Natural(0)
+    z = RNS_Natural(0)
     
     while x != z and y != z:
         if x > y:
