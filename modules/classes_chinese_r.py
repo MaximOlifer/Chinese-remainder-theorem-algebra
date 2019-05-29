@@ -25,8 +25,8 @@ mi = tuple([m // primes[i] for i in range(len(primes))])
 miopp = tuple([inverse_el(mi[i], primes[i]) for i in range(len(primes))])
 
 # For comparsion 1
-Sq = sum(primes)
-si = [( -inverse_el(mi[i], Sq)) % Sq  for i in range(len(primes))]
+Sq = sum(mi)
+si = [( -inverse_el(primes[i], Sq)) % Sq  for i in range(len(primes))]
 
 
 class ChineseRT_Natural:
@@ -37,12 +37,12 @@ class ChineseRT_Natural:
         self.miopp = miopp
         self.x = -1
         self.d = -1
-        self._compare_mod = 1
+        self._compare_mod = 2
         
         if type(arg) == type(list()) and len(arg) == len(self.primes):
-            self.r = arg.copy()
+            self.r = tuple([arg[i] for i in range(len(primes))].copy())
         elif type(arg) == type(tuple()) and len(arg) == len(self.primes):
-            self.r = arg
+            self.r = tuple([arg[i] for i in range(len(primes))].copy())
         elif type(arg) == type(int()):
             self.r = [0 for i in range(len(self.primes))]
             for i in range(len(self.primes)):
@@ -82,12 +82,18 @@ class ChineseRT_Natural:
         return res
     
     
+    def __ne__(self, other):
+        assert type(self) == type(other)
+        return not(self == other)
+    
+    
     def __add__(self, other):
         assert type(self) == type(other)
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = (self.r[i] + other.r[i]) % self.primes[i]
-        return ChineseRT_Natural(res)
+        z = ChineseRT_Natural(res)
+        return z
     
     
     def __sub__(self, other):
@@ -123,13 +129,12 @@ class ChineseRT_Natural:
         return ChineseRT_Natural(res)
         
     
-    # For comparsion 1
+    # For comparsion #TODO
     def _d_function(self):
         return (sum([si[i]*self.r[i] \
                      for i in range(len(primes))])) % Sq
     
-    # Comparsion 1
-    def _compare1(self, other):
+    def _compare(self, other):
         assert type(self) == type(other)
         if self.d == -1:
             self.d = self._d_function()
@@ -147,11 +152,6 @@ class ChineseRT_Natural:
                 return 1
             else:
                 return 0
-       
-    
-    def _compare(self, other):
-        if self._compare_mod == 1:
-            return self._compare1(other)
             
             
     def __lt__(self, other):
@@ -179,15 +179,16 @@ class ChineseRT_Natural:
             
     
     def _divide(self, other):
-        assert type(self) == type(other)
+        assert type(self) == type(other) and other != ChineseRT_Natural(0)
         x, y = self, other
         
-        result = 0
-        while x >= y:
-            result += 1
-            x -= y
-        
-        return ChineseRT_Natural(result), x
+        q = ChineseRT_Natural(0)
+        e = ChineseRT_Natural(1)
+        r = x
+        while r >= y:
+            q += e
+            r -= y
+        return q, r
     
     
     def __floordiv__(self, other):
@@ -198,4 +199,19 @@ class ChineseRT_Natural:
     def __mod__(self, other):
         assert type(self) == type(other)
         return self._divide(other)[1]
+    
+
+class ChineseRT_Integer(ChineseRT_Natural):
+    def __init__(self, arg):
+        if type(arg) == type(list()) and len(arg) == len(self.primes):
+            self.b = 0
+        elif type(arg) == type(tuple()) and len(arg) == len(self.primes):
+            self.b = 0
+        elif type(arg) == type(int()):
+            self.b = int(arg < 0)
+            arg = abs(arg)
+        else:
+            raise TypeError
+        
+        super.__init__(arg)
         
