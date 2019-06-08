@@ -100,6 +100,7 @@ class RNS_Natural:
         for i in range(len(self.primes)):
             res[i] = (self.r[i] + other.r[i]) % self.primes[i]
         z = RNS_Natural(res)
+        assert z >= self and z >= other
         return z
     
     
@@ -108,7 +109,9 @@ class RNS_Natural:
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = (self.r[i] - other.r[i]) % self.primes[i]
-        return RNS_Natural(res)
+        z = RNS_Natural(res)
+        assert z <= self
+        return z
     
     
     def __mul__(self, other):
@@ -116,7 +119,9 @@ class RNS_Natural:
         res = [0 for i in range(len(self.primes))]
         for i in range(len(self.primes)):
             res[i] = (self.r[i] * other.r[i]) % self.primes[i]
-        return RNS_Natural(res)
+        z = RNS_Natural(res)
+        assert z >= self and z >= other
+        return z
     
     
     # 1 / self
