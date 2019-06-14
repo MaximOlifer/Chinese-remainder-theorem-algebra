@@ -42,8 +42,10 @@ def test_5():
     n1 = RNS_Natural(input("Введите первое число: "))
     n2 = RNS_Natural(input("Введите второе число: "))
     print("Разность:")
-    print(n1 - n2)
-
+    if (n1 >= n2):
+        print(n1 - n2)
+    else:
+        print("Ошибка! Первое число должно быть больше либо равно второму.")
 
 def test_6():
     n1 = RNS_Natural(input("Введите первое число: "))
